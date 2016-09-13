@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Photo Gallery</title>
+	<script src="../jquery-2.2.4.js"></script>
+
+	<style>
+
+	#gallery {
+		width: 450px;
+		margin: 25px auto;
+		position: relative;
+	}
+
+	#upper {
+		height: 200px;
+		margin-bottom: 20px;
+	}
+
+	#upper img {
+		position: absolute;
+		height: 200px;
+		width: 100%;
+	}
+
+	#lower {
+		overflow:hidden;
+	}
+
+	.thumb img {
+		width: 140px;
+		height: 120px;
+		padding-left: 5px;
+		padding-right: 5px;
+		opacity: .4;
+		cursor: pointer;
+	}
+
+	.thumb img:hover {
+		opacity: 1;
+	}
+
+	#thumbs {
+		white-space: nowrap;
+	}
+
+	#thumbs a {
+		display: inline-block;
+	}
+
+	.arrow {
+		position: absolute;
+		bottom: 45px;
+	}
+
+	.arrow img {
+		height: 20px;
+		width: 20px;
+	}
+
+	.arrow img:hover {
+		opacity: 1;
+	}
+
+	#leftArrow {
+		left: -60px;
+		transform: rotate(180deg);
+	}
+
+	#rightArrow {
+		right: -60px;
+	}
+
+	.arrow.disabled {
+		display: none;
+	}
+
+	</style>
+</head>
+
+
+<body>
+
+<div id="gallery">
+	<div id="upper"></div>
+	<div id="lower">
+		<a href="#" class="arrow" id="leftArrow"><img src="images/rightarrow.png" /></a>
+		<div id="thumbs">
+			<!-- Thumbnails go here -->
+		</div>
+		<a href="#" class="arrow" id="rightArrow"><img src="images/rightarrow.png" /></a>
+	</div>
+</div>
+</body>
+
+<script type="text/javascript">
+
+var imagesArray = new Array();
+for (var i = 1; i < 7; i++) {
+	imagesArray.push("images/photo" + i + ".jpeg");
+}
+
+function updateArrows() {
+	var totalNoImages = $("#upper").find("img").length;
+	var galleryWidth = $("#gallery").css("width");
+	var thumbWidth = $(".thumb").css("width");
+
+	galleryWidth = galleryWidth.slice(0, (galleryWidth.length - 2));
+	thumbWidth = thumbWidth.slice(0, (thumbWidth.length - 2));
+	var maxThumbnails = galleryWidth / thumbWidth;
+	
+	var leftBound = "0px";
+	var rightBound = ((maxThumbnails - totalNoImages) * thumbWidth);
+	rightBound = rightBound.toString().concat("px");
+	
+	if ( $("#thumbs").css("marginLeft") === rightBound ) {
+		$("#rightArrow").addClass("disabled");
+	}
+	else {
+		$("#rightArrow").removeClass("disabled");	
+	}
+	if ( $("#thumbs").css("marginLeft") === leftBound ) {
+		$("#leftArrow").addClass("disabled");
+	} else {
+		$("#leftArrow").removeClass("disabled");
+	}
+}
+
+
+function arrowClick(obj) {
+	obj.off("click");
+	var arrowId = obj.attr("id");
+	var thumbWidth = $(".thumb").css("width");
+	var scrollString = (arrowId === "leftArrow") ? "+=" : "-=";
+	console.log("this: " + obj.attr("id") + " scrollString: " + scrollString);
+	$("#thumbs").animate(
+		{ marginLeft: scrollString + thumbWidth }, "fast",
+			function() {
+				obj.on("click", function() {
+					arrowClick(obj);
+				});
+			});
+	setTimeout(updateArrows, 300);
+};
+
+
+$(document).ready(function() {
+	$.each(imagesArray, function(index, value) {
+		$("#upper").append("<img id='img" 
+			+ index + "' src=" + value + " />");
+		$("#thumbs").append("<a href='#' class='thumb' id='img" 
+			+ index + "'><img src=" + value + " /></a>");
+	});
+
+	$(".thumb").on("click", function() {
+		var thumbId = $(this).attr("id");
+		$("#" + thumbId).insertAfter( $("#upper img:last"));
+	});
+
+	updateArrows();
+
+	$(".arrow").on("click", function() {
+		arrowClick($(this));
+	});
+	
+});
+</script>
+
+
+</html>
